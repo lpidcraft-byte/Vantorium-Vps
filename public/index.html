@@ -3,66 +3,166 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Dashboard</title>
+<title>BotHub</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: system-ui, -apple-system, sans-serif; background:#0f172a; color:#e2e8f0; min-height:100vh; }
-  .container { max-width: 900px; margin: 0 auto; padding: 24px; }
-  h1 { font-size: 22px; margin-bottom: 16px; }
-  .card { background:#1e293b; border:1px solid #334155; border-radius:12px; padding:16px; margin-bottom:16px; }
-  button { background:#3b82f6; color:white; border:none; padding:10px 16px; border-radius:8px; cursor:pointer; font-size:14px; }
-  button:hover { background:#2563eb; }
-  button.secondary { background:#334155; }
-  input[type=file] { color:#94a3b8; }
-  .avatar { width:48px; height:48px; border-radius:50%; background:#334155; object-fit:cover; }
-  .status { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:600; }
-  .s-PENDING_APPROVAL { background:#78350f; color:#fbbf24; }
-  .s-APPROVED, .s-RUNNING { background:#14532d; color:#4ade80; }
-  .s-REJECTED, .s-DEPLOY_FAILED { background:#7f1d1d; color:#f87171; }
-  .s-DEPLOYING { background:#1e3a8a; color:#60a5fa; }
-  .bot-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #334155; }
-  .bot-row:last-child { border-bottom:none; }
-  .notif { background:#1e293b; border-left:3px solid #3b82f6; padding:10px 14px; margin-bottom:8px; border-radius:6px; font-size:13px; }
-  .muted { color:#94a3b8; font-size:12px; }
-  .login { max-width:400px; margin:80px auto; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#0a0e1a;color:#e2e8f0;min-height:100vh}
+  .hidden{display:none!important}
+  /* Auth */
+  .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at top,#1e293b 0%,#0a0e1a 60%)}
+  .auth-box{background:#111827;border:1px solid #1f2937;border-radius:16px;padding:36px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .auth-box h1{font-size:24px;margin-bottom:6px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .auth-box p{color:#64748b;font-size:13px;margin-bottom:24px}
+  .tabs{display:flex;background:#0a0e1a;border-radius:8px;padding:4px;margin-bottom:20px}
+  .tabs button{flex:1;padding:8px;border:none;background:none;color:#64748b;cursor:pointer;border-radius:6px;font-size:13px;font-weight:500;transition:.2s}
+  .tabs button.active{background:#1f2937;color:#e2e8f0}
+  .form-group{margin-bottom:14px}
+  .form-group label{display:block;font-size:12px;color:#94a3b8;margin-bottom:6px;font-weight:500}
+  .form-group input{width:100%;padding:11px 14px;background:#0a0e1a;border:1px solid #1f2937;border-radius:8px;color:#e2e8f0;font-size:14px;transition:.2s}
+  .form-group input:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+  .btn-primary{width:100%;padding:12px;background:linear-gradient(135deg,#3b82f6,#2563eb);border:none;border-radius:8px;color:white;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;margin-top:6px}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(59,130,246,.3)}
+  .btn-primary:disabled{opacity:.6;cursor:not-allowed}
+  .error-msg{background:#7f1d1d;color:#fecaca;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px}
+  .hint{text-align:center;font-size:12px;color:#64748b;margin-top:16px}
+  /* App shell */
+  .topbar{background:#111827;border-bottom:1px solid #1f2937;padding:16px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:50}
+  .logo{font-size:18px;font-weight:700;background:linear-gradient(135deg,#3b82f6,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .topbar .spacer{flex:1}
+  .user-chip{display:flex;align-items:center;gap:10px;padding:6px 12px 6px 6px;background:#1f2937;border-radius:999px}
+  .user-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px}
+  .user-chip span{font-size:13px;font-weight:500}
+  .user-chip small{color:#64748b;font-size:11px}
+  .btn-logout{background:none;border:1px solid #334155;color:#94a3b8;padding:7px 14px;border-radius:8px;cursor:pointer;font-size:12px;transition:.2s}
+  .btn-logout:hover{border-color:#dc2626;color:#f87171}
+  .container{max-width:1100px;margin:0 auto;padding:32px 24px}
+  h1.page-title{font-size:26px;margin-bottom:6px}
+  p.page-sub{color:#64748b;font-size:14px;margin-bottom:28px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:800px){.grid{grid-template-columns:1fr}}
+  .card{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:24px}
+  .card h3{font-size:15px;font-weight:600;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+  .card h3 .icon{font-size:18px}
+  .dropzone{border:2px dashed #334155;border-radius:12px;padding:32px 20px;text-align:center;cursor:pointer;transition:.2s;background:#0a0e1a}
+  .dropzone:hover,.dropzone.dragover{border-color:#3b82f6;background:rgba(59,130,246,.05)}
+  .dropzone .big{font-size:36px;margin-bottom:10px}
+  .dropzone p{font-size:13px;color:#94a3b8}
+  .dropzone .small{font-size:11px;color:#64748b;margin-top:6px}
+  .file-chosen{margin-top:12px;padding:10px;background:#0a0e1a;border-radius:8px;font-size:12px;color:#60a5fa;display:flex;justify-content:space-between;align-items:center}
+  .file-chosen button{background:none;border:none;color:#f87171;cursor:pointer;font-size:16px}
+  .input-token{width:100%;padding:11px 14px;background:#0a0e1a;border:1px solid #1f2937;border-radius:8px;color:#e2e8f0;font-size:13px;font-family:'SF Mono',monospace;margin-top:12px}
+  .input-token:focus{outline:none;border-color:#3b82f6}
+  .bot-item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #1f2937}
+  .bot-item:last-child{border-bottom:none}
+  .bot-avatar{width:44px;height:44px;border-radius:12px;object-fit:cover;background:#1f2937;flex-shrink:0}
+  .bot-info{flex:1;min-width:0}
+  .bot-info strong{font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bot-info small{color:#64748b;font-size:12px}
+  .status-badge{font-size:10px;font-weight:700;text-transform:uppercase;padding:5px 10px;border-radius:6px;white-space:nowrap;letter-spacing:.5px}
+  .s-PENDING_APPROVAL{background:rgba(251,191,36,.15);color:#fbbf24}
+  .s-APPROVED{background:rgba(96,165,250,.15);color:#60a5fa}
+  .s-DEPLOYING{background:rgba(139,92,246,.15);color:#a78bfa}
+  .s-RUNNING{background:rgba(74,222,128,.15);color:#4ade80}
+  .s-REJECTED,.s-DEPLOY_FAILED{background:rgba(248,113,113,.15);color:#f87171}
+  .s-VERIFYING,.s-ANALYZING,.s-UPLOADING{background:rgba(148,163,184,.15);color:#94a3b8}
+  .empty{text-align:center;padding:32px;color:#64748b;font-size:13px}
+  .notif-item{padding:12px 14px;background:#0a0e1a;border-left:3px solid #3b82f6;border-radius:8px;margin-bottom:8px;font-size:13px}
+  .notif-item .title{font-weight:600;margin-bottom:4px}
+  .notif-item .time{font-size:11px;color:#64748b;margin-top:4px}
+  .notif-item.unread{background:rgba(59,130,246,.08)}
+  .notif-item.rejected{border-left-color:#dc2626}
+  .notif-item.running{border-left-color:#16a34a}
+  .reason{color:#f87171;font-size:12px;margin-top:6px;padding:8px;background:rgba(220,38,38,.1);border-radius:6px}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:8px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .progress-bar{height:4px;background:#1f2937;border-radius:2px;overflow:hidden;margin-top:10px}
+  .progress-bar div{height:100%;background:linear-gradient(90deg,#3b82f6,#8b5cf6);width:0;transition:width .5s}
+  .link-admin{color:#60a5fa;text-decoration:none;font-size:13px}
+  .link-admin:hover{text-decoration:underline}
 </style>
 </head>
 <body>
-<div class="container">
-  <h1>🤖 My Bots</h1>
 
-  <div id="login" class="card login">
-    <h3 style="margin-bottom:12px;">Demo Login</h3>
-    <p class="muted" style="margin-bottom:12px;">Kullanıcı paneli için tıkla:</p>
-    <button onclick="login('user-1')">USER olarak gir (baba3101)</button>
-    <button class="secondary" onclick="login('admin-1')">ADMIN olarak gir</button>
+<!-- ============ AUTH SCREEN ============ -->
+<div id="authScreen" class="auth-wrap">
+  <div class="auth-box">
+    <h1 id="authTitle">BotHub</h1>
+    <p id="authSub">Deploy your Telegram bot with admin approval</p>
+    <div class="tabs">
+      <button id="tabLogin" class="active" onclick="switchAuth('login')">Login</button>
+      <button id="tabRegister" onclick="switchAuth('register')">Register</button>
+    </div>
+    <div id="authError" class="error-msg hidden"></div>
+    <form id="authForm" onsubmit="submitAuth(event)">
+      <div class="form-group">
+        <label>Username</label>
+        <input id="inpUsername" type="text" autocomplete="username" required>
+      </div>
+      <div class="form-group hidden" id="emailGroup">
+        <label>Email</label>
+        <input id="inpEmail" type="email" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input id="inpPassword" type="password" autocomplete="current-password" required minlength="6">
+      </div>
+      <button type="submit" class="btn-primary" id="authSubmitBtn">Login</button>
+    </form>
+    <p class="hint">Admin demo: <b>admin / admin123</b></p>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="appScreen" class="hidden">
+  <div class="topbar">
+    <div class="logo">BotHub</div>
+    <div class="spacer"></div>
+    <a href="/admin" class="link-admin" id="adminLink" style="display:none">→ Admin Panel</a>
+    <div class="user-chip">
+      <div class="user-avatar" id="userAvatar">U</div>
+      <div>
+        <span id="userName">User</span><br>
+        <small id="userRole">USER</small>
+      </div>
+    </div>
+    <button class="btn-logout" onclick="logout()">Logout</button>
   </div>
 
-  <div id="app" style="display:none;">
-    <div class="card">
-      <h3 style="margin-bottom:12px;">Submit New Bot</h3>
-      <p class="muted" style="margin-bottom:12px;">Zip dosyası yükle. Bot admin onayına düşer.</p>
-      <input type="file" id="file" accept=".zip" style="margin-bottom:12px;"><br>
-      <input type="text" id="botToken" placeholder="Telegram token (opsiyonel, dosyadan da bulunabilir)" style="width:100%; max-width:420px; padding:8px; background:#0f172a; border:1px solid #334155; color:#e2e8f0; border-radius:6px; margin-bottom:12px;">
-      <br><button onclick="upload()">Upload & Verify</button>
+  <div class="container">
+    <h1 class="page-title">My Bots</h1>
+    <p class="page-sub">Upload a Telegram bot zip. It will be reviewed by an admin before deployment.</p>
+
+    <div class="grid">
+      <div class="card">
+        <h3><span class="icon">📦</span> Submit New Bot</h3>
+        <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+          <div class="big">📤</div>
+          <p>Click or drop your <b>.zip</b> file here</p>
+          <div class="small">Max 50MB — token will be auto-detected</div>
+        </div>
+        <input type="file" id="fileInput" accept=".zip" class="hidden" onchange="onFilePicked(event)">
+        <div id="fileChosen" class="file-chosen hidden">
+          <span id="fileChosenName"></span>
+          <button onclick="clearFile(event)">✕</button>
+        </div>
+        <input id="botToken" class="input-token" placeholder="Telegram token (optional — auto-detected)">
+        <button class="btn-primary" id="uploadBtn" onclick="uploadBot()" style="margin-top:12px">Upload & Verify</button>
+        <div class="progress-bar hidden" id="uploadProgress"><div></div></div>
+      </div>
+
+      <div class="card">
+        <h3><span class="icon">🔔</span> Notifications</h3>
+        <div id="notifList"><div class="empty">No notifications yet</div></div>
+      </div>
     </div>
 
-    <div class="card">
-      <h3 style="margin-bottom:12px;">Notifications</h3>
-      <div id="notifications"></div>
-    </div>
-
-    <div class="card">
-      <h3 style="margin-bottom:12px;">My Bots</h3>
-      <div id="bots"></div>
-    </div>
-
-    <div class="card">
-      <a href="/admin" style="color:#60a5fa;">→ Admin Panel</a>
+    <div class="card" style="margin-top:20px">
+      <h3><span class="icon">🤖</span> My Bot Submissions</h3>
+      <div id="botList"><div class="empty">No bots submitted yet</div></div>
     </div>
   </div>
 </div>
 
-<script src="/user.js"></script>
+<script src="/app.js"></script>
 </body>
 </html>
