@@ -318,3 +318,41 @@ async function renderDeployments(main) {
   main.innerHTML = `<h1>Deployments</h1><p class="subtitle">${deploys.length} total</p>` +
     deploys.map(b => `<div class="approval-card" style="padding:16px;">
       <div style="display:flex;align-items:center;gap:12px;">
+        <div style="flex:1;font-weight:600;">${esc(b.name)} @${esc(b.username||'')}</div>
+        <span class="badge-status st-${b.status}">${b.status}</span>
+      </div>
+      <div class="deployment-bar">${(b.deployment.steps||[]).map(s => `<span class="dep-step ${s.status.toLowerCase()}">${s.step}</span>`).join('')}</div>
+    </div>`).join('') || '<div class="empty">No deployments.</div>';
+}
+
+async function renderAudit(main) {
+  const r = await fetch('/api/admin/audit');
+  const { logs } = await r.json();
+  main.innerHTML = `<h1>Audit Log</h1><p class="subtitle">Last ${logs.length} events</p>
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="background:#0f172a;"><th style="padding:10px;text-align:left;">Time</th><th style="padding:10px;text-align:left;">Action</th><th style="padding:10px;text-align:left;">Admin</th><th style="padding:10px;text-align:left;">Target</th></tr></thead>
+        <tbody>${logs.slice(0,100).map(l => `<tr style="border-top:1px solid #334155;">
+          <td style="padding:8px 10px;">${new Date(l.createdAt).toLocaleString()}</td>
+          <td style="padding:8px 10px;"><code>${esc(l.action)}</code></td>
+          <td style="padding:8px 10px;">${esc(l.adminId || '—')}</td>
+          <td style="padding:8px 10px;">${esc(l.targetType)}:${esc((l.targetId||'').slice(0,12))}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+function toast(msg, isError) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  if (isError) t.style.borderLeftColor = '#dc2626';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+function esc(s) { return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fallbackAvatar(name) {
+  const letter = (name||'B')[0].toUpperCase();
+  return 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56"><circle cx="28" cy="28" r="28" fill="#334155"/><text x="28" y="38" font-size="26" fill="#94a3b8" text-anchor="middle" font-family="sans-serif">${letter}</text></svg>`);
+}
