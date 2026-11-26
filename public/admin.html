@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Panel</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background:#0f172a; color:#e2e8f0; min-height:100vh; display:flex; }
+  .sidebar { width:220px; background:#1e293b; border-right:1px solid #334155; padding:20px 0; flex-shrink:0; }
+  .sidebar h2 { font-size:14px; padding:0 20px 16px; color:#60a5fa; text-transform:uppercase; letter-spacing:1px; }
+  .nav a { display:block; padding:10px 20px; color:#94a3b8; text-decoration:none; font-size:14px; border-left:3px solid transparent; }
+  .nav a:hover, .nav a.active { background:#0f172a; color:#e2e8f0; border-left-color:#3b82f6; }
+  .nav a .badge { float:right; background:#dc2626; color:white; font-size:11px; padding:1px 7px; border-radius:999px; font-weight:600; }
+  .main { flex:1; padding:24px; overflow-y:auto; }
+  h1 { font-size:24px; margin-bottom:8px; }
+  .subtitle { color:#94a3b8; font-size:14px; margin-bottom:24px; }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:24px; }
+  .stat { background:#1e293b; border:1px solid #334155; border-radius:10px; padding:16px; }
+  .stat .label { color:#94a3b8; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+  .stat .value { font-size:28px; font-weight:700; }
+  .filters { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+  .filters button { background:#334155; color:#e2e8f0; border:1px solid #334155; padding:8px 16px; border-radius:8px; cursor:pointer; font-size:13px; }
+  .filters button.active { background:#3b82f6; border-color:#3b82f6; }
+  .search { width:100%; max-width:400px; padding:10px; background:#1e293b; border:1px solid #334155; color:#e2e8f0; border-radius:8px; margin-bottom:16px; font-size:14px; }
+  .approval-card { background:#1e293b; border:1px solid #334155; border-radius:14px; margin-bottom:16px; overflow:hidden; }
+  .card-header { display:flex; align-items:center; gap:14px; padding:20px; border-bottom:1px solid #334155; }
+  .avatar { width:56px; height:56px; border-radius:50%; background:#334155; object-fit:cover; flex-shrink:0; }
+  .bot-name { font-size:18px; font-weight:600; }
+  .bot-username { color:#94a3b8; font-size:13px; }
+  .badge-status { display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:999px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-left:auto; }
+  .st-PENDING_APPROVAL { background:#78350f; color:#fbbf24; }
+  .st-APPROVED, .st-RUNNING { background:#14532d; color:#4ade80; }
+  .st-REJECTED, .st-DEPLOY_FAILED { background:#7f1d1d; color:#f87171; }
+  .st-DEPLOYING { background:#1e3a8a; color:#60a5fa; }
+  .card-body { padding:20px; display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media(max-width:768px) { .card-body { grid-template-columns:1fr; } .sidebar{ width:100%; position:fixed; bottom:0; left:0; right:0; height:auto; z-index:10; display:flex; padding:8px; } .sidebar h2{ display:none; } .nav{ display:flex; overflow-x:auto; } .main{ padding-bottom:80px; } body{ display:block; } }
+  .info-grid { display:grid; grid-template-columns:120px 1fr; gap:8px; font-size:13px; }
+  .info-grid .label { color:#94a3b8; }
+  .info-grid .value { color:#e2e8f0; word-break:break-all; }
+  .info-grid .value.mono { font-family: monospace; font-size:12px; }
+  .section-title { font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
+  .file-box { background:#0f172a; border-radius:8px; padding:12px; margin-bottom:8px; }
+  .file-actions { display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+  button.btn { background:#334155; color:#e2e8f0; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-size:12px; font-weight:500; }
+  button.btn:hover { background:#475569; }
+  button.btn-approve { background:#16a34a; color:white; }
+  button.btn-approve:hover { background:#15803d; }
+  button.btn-reject { background:#dc2626; color:white; }
+  button.btn-reject:hover { background:#b91c1c; }
+  .actions { padding:16px 20px; display:flex; gap:10px; border-top:1px solid #334155; justify-content:flex-end; flex-wrap:wrap; }
+  .actions button { padding:10px 22px; font-size:13px; font-weight:600; }
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); display:none; align-items:center; justify-content:center; z-index:100; padding:20px; }
+  .modal-overlay.active { display:flex; }
+  .modal { background:#1e293b; border:1px solid #334155; border-radius:14px; padding:24px; max-width:500px; width:100%; }
+  .modal h3 { margin-bottom:8px; font-size:18px; }
+  .modal p { color:#94a3b8; font-size:13px; margin-bottom:16px; }
+  .modal textarea, .modal input { width:100%; padding:10px; background:#0f172a; border:1px solid #334155; color:#e2e8f0; border-radius:8px; margin-bottom:12px; font-family:inherit; font-size:13px; }
+  .modal textarea { min-height:100px; resize:vertical; }
+  .modal-actions { display:flex; gap:8px; justify-content:flex-end; }
+  .empty { text-align:center; padding:40px; color:#64748b; }
+  .toast { position:fixed; bottom:20px; right:20px; background:#1e293b; border-left:3px solid #16a34a; padding:12px 18px; border-radius:8px; font-size:13px; z-index:200; }
+  pre.viewer { background:#0f172a; padding:16px; border-radius:8px; overflow:auto; max-height:400px; font-size:12px; white-space:pre-wrap; word-break:break-all; }
+  .deployment-bar { display:flex; gap:4px; margin-top:12px; flex-wrap:wrap; }
+  .dep-step { font-size:10px; padding:4px 8px; border-radius:4px; background:#0f172a; color:#64748b; }
+  .dep-step.done { background:#14532d; color:#4ade80; }
+  .dep-step.running { background:#1e3a8a; color:#60a5fa; }
+  #login { max-width:400px; margin:80px auto; background:#1e293b; border:1px solid #334155; padding:24px; border-radius:14px; }
+  #login h2 { margin-bottom:16px; }
+  #login button { width:100%; margin-bottom:8px; padding:12px; border-radius:8px; border:none; cursor:pointer; font-size:14px; background:#3b82f6; color:white; }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <h2>Admin Panel Login</h2>
+  <button onclick="login('admin-1')">ADMIN olarak gir</button>
+  <button onclick="login('user-1')" style="background:#334155;">USER olarak gir (403 testi)</button>
+</div>
+
+<div id="adminRoot" style="display:none; width:100%; display:none;">
+  <div class="sidebar">
+    <h2>Admin</h2>
+    <div class="nav">
+      <a href="#" class="active" onclick="setTab('overview',this)">📊 Overview</a>
+      <a href="#" onclick="setTab('users',this)">👥 Users</a>
+      <a href="#" onclick="setTab('approvals',this)">✅ Bot Approvals <span class="badge" id="pendingBadge">0</span></a>
+      <a href="#" onclick="setTab('bots',this)">🤖 Running Bots</a>
+      <a href="#" onclick="setTab('deployments',this)">🚀 Deployments</a>
+      <a href="#" onclick="setTab('audit',this)">📋 Audit Log</a>
+      <a href="#" onclick="setTab('settings',this)">⚙️ Settings</a>
+    </div>
+  </div>
+
+  <div class="main" id="main">
+    <!-- rendered by JS -->
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script src="/admin.js"></script>
+</body>
+</html>
