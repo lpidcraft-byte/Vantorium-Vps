@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background:#0f172a; color:#e2e8f0; min-height:100vh; }
+  .container { max-width: 900px; margin: 0 auto; padding: 24px; }
+  h1 { font-size: 22px; margin-bottom: 16px; }
+  .card { background:#1e293b; border:1px solid #334155; border-radius:12px; padding:16px; margin-bottom:16px; }
+  button { background:#3b82f6; color:white; border:none; padding:10px 16px; border-radius:8px; cursor:pointer; font-size:14px; }
+  button:hover { background:#2563eb; }
+  button.secondary { background:#334155; }
+  input[type=file] { color:#94a3b8; }
+  .avatar { width:48px; height:48px; border-radius:50%; background:#334155; object-fit:cover; }
+  .status { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:12px; font-weight:600; }
+  .s-PENDING_APPROVAL { background:#78350f; color:#fbbf24; }
+  .s-APPROVED, .s-RUNNING { background:#14532d; color:#4ade80; }
+  .s-REJECTED, .s-DEPLOY_FAILED { background:#7f1d1d; color:#f87171; }
+  .s-DEPLOYING { background:#1e3a8a; color:#60a5fa; }
+  .bot-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #334155; }
+  .bot-row:last-child { border-bottom:none; }
+  .notif { background:#1e293b; border-left:3px solid #3b82f6; padding:10px 14px; margin-bottom:8px; border-radius:6px; font-size:13px; }
+  .muted { color:#94a3b8; font-size:12px; }
+  .login { max-width:400px; margin:80px auto; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🤖 My Bots</h1>
+
+  <div id="login" class="card login">
+    <h3 style="margin-bottom:12px;">Demo Login</h3>
+    <p class="muted" style="margin-bottom:12px;">Kullanıcı paneli için tıkla:</p>
+    <button onclick="login('user-1')">USER olarak gir (baba3101)</button>
+    <button class="secondary" onclick="login('admin-1')">ADMIN olarak gir</button>
+  </div>
+
+  <div id="app" style="display:none;">
+    <div class="card">
+      <h3 style="margin-bottom:12px;">Submit New Bot</h3>
+      <p class="muted" style="margin-bottom:12px;">Zip dosyası yükle. Bot admin onayına düşer.</p>
+      <input type="file" id="file" accept=".zip" style="margin-bottom:12px;"><br>
+      <input type="text" id="botToken" placeholder="Telegram token (opsiyonel, dosyadan da bulunabilir)" style="width:100%; max-width:420px; padding:8px; background:#0f172a; border:1px solid #334155; color:#e2e8f0; border-radius:6px; margin-bottom:12px;">
+      <br><button onclick="upload()">Upload & Verify</button>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:12px;">Notifications</h3>
+      <div id="notifications"></div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:12px;">My Bots</h3>
+      <div id="bots"></div>
+    </div>
+
+    <div class="card">
+      <a href="/admin" style="color:#60a5fa;">→ Admin Panel</a>
+    </div>
+  </div>
+</div>
+
+<script src="/user.js"></script>
+</body>
+</html>
