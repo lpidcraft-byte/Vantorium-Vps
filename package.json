@@ -1,13 +1,12 @@
 {
-  "name": "bot-approval-system",
+  "name": "bot-approval",
   "version": "1.0.0",
   "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
+  "scripts": { "start": "node server.js" },
   "dependencies": {
     "express": "^4.19.2",
-    "cookie-parser": "^1.4.6",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "adm-zip": "^0.5.10",
     "node-fetch": "^2.7.0"
